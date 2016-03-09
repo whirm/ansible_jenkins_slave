@@ -1,0 +1,41 @@
+---
+
+- name: Create jenkins user
+  action: user name="{{item.name}}" comment="{{item.comment}}" shell="/bin/bash" state=present
+  with_items:
+    - { name: 'jenkins', comment: "Jenkins job execution user" }
+
+- name: Remove non-authorized keys for root
+  action: authorized_key user=root state=absent  key="{{item}}"
+  with_items:
+    - "{{ lookup('file', 'ssh_keys/jenkins.pub') }}"
+
+- name: Update authorized keys for jenkins
+  action: authorized_key user=jenkins state=present key="{{item}}"
+  with_items:
+    - "{{ lookup('file', 'ssh_keys/jenkins.pub') }}"
+
+- name: Install tmpreaper
+  action: apt pkg={{item}} state=present default_release={{debian_release}}
+  with_items:
+    - tmpreaper
+
+- name: Configure tmpreaper days (1/2)
+  action: lineinfile dest=/etc/default/rcS regexp='^TMPTIME=.*$' line='TMPTIME=2' state=present
+
+- name: Enable tmpreaper (2/2)
+  action: "lineinfile dest=/etc/tmpreaper.conf regexp='^.*SHOWWARNING=.*$' line='#SHOWWARNING=true'"
+
+- name: Remove old java runtimes
+  action: apt pkg={{item}} state=absent default_release={{debian_release}} purge=yes
+  with_items:
+    - openjdk-6-jdk
+    - openjdk-6-jre
+    - openjdk-6-jre-headless
+    - openjdk-6-jre-lib
+
+- name: Install java runtime
+  action: apt pkg={{item}} state=present default_release={{debian_release}}
+  with_items:
+    - default-jre
+    - openjdk-7-jdk # Needed by the graphalytics team

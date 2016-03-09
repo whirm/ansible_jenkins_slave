@@ -1,0 +1,4 @@
+---
+
+dependencies:
+  - whirm.set_debian_release
