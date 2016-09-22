@@ -24,5 +24,4 @@ galaxy_info:
     - ssh
     - tribler
 
-dependencies:
-  - whirm.set_debian_release
+dependencies: []

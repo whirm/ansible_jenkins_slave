@@ -15,6 +15,9 @@
   with_items:
     - "{{ lookup('file', 'ssh_keys/jenkins.pub') }}"
 
+- name: "Set {{debian_release}} repository"
+  apt_repository: repo='deb http://ftp.nl.debian.org/debian {{debian_release}} main contrib non-free' state=present update_cache=yes
+
 - name: Install tmpreaper
   action: apt pkg={{item}} state=present default_release={{debian_release}}
   with_items:
